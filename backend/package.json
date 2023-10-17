@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend para o Projeto de ADAD 2022 2023\u001b[D\u001b[D\u001b[D\u001b[\u001b[\u001b[C/\u001b[C\u001b/2023",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raj-dev-Kumar/ADAD2223.git#main"
+  },
+  "author": "Rajdev Kumar e Pedro Santana",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Raj-dev-Kumar/ADAD2223/issues"
+  },
+  "homepage": "https://github.com/Raj-dev-Kumar/ADAD2223/tree/main#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.1.0"
+  }
+}
