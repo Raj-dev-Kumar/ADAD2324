@@ -20,6 +20,8 @@ const dbName = 'project';
     
   } catch (error) {
     console.log("Error")
+    const db = {}
+    module.exports = db
     
   }
 
