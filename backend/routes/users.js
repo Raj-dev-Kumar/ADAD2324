@@ -17,6 +17,11 @@ router.get('/:userid', async (req, res) => {
   
 })
 
+router.post('/createuser', async (req, res) => {
+  res.json({requestBody: req.body})
+  
+})
+
 // Todos os utilizadores - (Limitado a 50)
 router.get('/', async (req, res) => {
   users = await mongo.collection("users").find({}).limit(50).toArray()
