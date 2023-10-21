@@ -17,7 +17,7 @@ router.get('/:movieid', async (req, res) => {
   var id_aprocurar = parseInt(req.params.movieid)
   
   movies = await moviesCollection.find({"_id":id_aprocurar}).toArray()
-  if(movie.length<1)
+  if(movies.length<1)
   movies = await moviesCollection.find({"_id":new tipoObjectId(req.params.movieid)}).toArray()
 
   res.send(movies)
