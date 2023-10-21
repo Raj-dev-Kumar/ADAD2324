@@ -21,15 +21,9 @@ router.get('/:userid', async (req, res) => {
 
 router.post('/', async (req, res) => {
 
-  idUtilizadorInserido = []
-  req.body.users.forEach(async user => {
-    var usercollection = mongo.collection("users")
-    var adicionarUtilizador = await usercollection.insertMany([user])
-    idUtilizadorInserido.push(adicionarUtilizador.insertedIds)
-  });
-
-
-  res.json({"Resultado":idUtilizadorInserido})
+  var usercollection = mongo.collection("users")
+  var adicionarUtilizador = await usercollection.insertMany(req.body.users)
+  res.json({"Resultado":req.body.users,"MN":adicionarUtilizador})
   
 })
 
