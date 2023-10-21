@@ -18,5 +18,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(process.env.PORT, () => {
-  console.log(`Example app listening on port ${process.env.PORT}`)
+  console.log(`Backend a correr na porta: ${process.env.PORT}`)
 })
