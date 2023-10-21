@@ -11,20 +11,33 @@ router.use((req, res, next) => {
 router.get('/:userid', async (req, res) => {
 
   var id_aprocurar = parseInt(req.params.userid)
+  var usercollection = mongo.collection("users")
   
-  users = await mongo.collection("users").find({"_id":id_aprocurar}).toArray()
+  users = await usercollection.find({"_id":id_aprocurar}).toArray()
+
   res.send(users)
   
 })
 
-router.post('/createuser', async (req, res) => {
-  res.json({requestBody: req.body})
+router.post('/', async (req, res) => {
+
+  idUtilizadorInserido = []
+  req.body.users.forEach(async user => {
+    var usercollection = mongo.collection("users")
+    var adicionarUtilizador = await usercollection.insertMany([user])
+    idUtilizadorInserido.push(adicionarUtilizador.insertedIds)
+  });
+
+
+  res.json({"Resultado":idUtilizadorInserido})
   
 })
 
 // Todos os utilizadores - (Limitado a 50)
 router.get('/', async (req, res) => {
-  users = await mongo.collection("users").find({}).limit(50).toArray()
+  
+  var usercollection = mongo.collection("users")
+  users = await usercollection.find({}).limit(50).toArray()
   res.send(users)
   
 })

@@ -14,7 +14,7 @@ app.use(bodyParser.json())
 
 app.use("/api",api_route)
 app.get('/', (req, res) => {
-  res.send("BACKEND")
+  res.sendStatus(404)
 })
 
 app.listen(process.env.PORT, () => {
