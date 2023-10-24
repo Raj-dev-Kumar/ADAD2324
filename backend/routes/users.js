@@ -51,4 +51,12 @@ router.get('/', async (req, res) => {
   
 })
 
+router.put('/:userid', async (req, res) => {
+  var id_aprocurar = parseInt(rq.params.movieid)
+  if(movies.istype(Array)){
+  var updateUsers =  await usercollection.updateMany({"_id":id_aprocurar},{$set: {name : req.body.name, gender : req.body.gender, age : req.body.age, ocupation : req.body.ocupation, movies : req.body.movies}})
+  res.json({"Resultado":updateUsers})}
+  res.send("Ocurreu um erro").status(500)
+})
+
 module.exports = router

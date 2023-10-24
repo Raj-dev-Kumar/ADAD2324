@@ -50,4 +50,12 @@ router.get('/', async (req, res) => {
   
 })
 
+router.put('/:movieid', async (req, res) => {
+  var id_aprocurar = parseInt(rq.params.movieid)
+  if(genres.istype(Array)){
+  var updateMovies =  await moviesCollection.updateMany({"_id":id_aprocurar},{$set: {title : req.body.title, genres : req.body.genres, ano : req.body.ano}})
+  res.json({"Resultado":updateMovies})}
+  res.send("Ocurreu um erro").status(500)
+})
+
 module.exports = router
