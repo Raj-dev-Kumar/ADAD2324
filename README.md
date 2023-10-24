@@ -1,5 +1,5 @@
-# ADAD2223
-Repositorio do Projecto de ADAD 2022/2023, Realizado por Rajdev e Pedro
+# ADAD2324
+Repositorio do Projecto de ADAD 2023/2024, Realizado por Rajdev e Pedro
 
 .env Variables
 
