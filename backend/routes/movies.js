@@ -70,6 +70,42 @@ router.get('/higher/:num_movies', async (req, res) => {
 res.send(a)
   
 })
+router.get('/ratings/:order', async (req, res) => {
+  var order = req.params.order
+  var a = await usersCollection.aggregate([
+    { $unwind: "$movies" },
+    {
+        $group: {
+            _id: "$movies.movieid",
+            quantidadeRatings: { $count: { } },
+        }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+
+    },
+    { $unwind: "$movieInfo" },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            quantidadeRatings: 1
+        }
+      },
+]).limit(5).sort({"quantidadeRatings":-1}).toArray()
+
+res.json(a)
+  
+})
+
+
 
 router.post('/', async (req, res) => {
 
