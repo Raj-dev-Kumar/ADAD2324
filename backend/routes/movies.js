@@ -71,8 +71,9 @@ res.send(a)
   
 })
 router.get('/ratings/:order', async (req, res) => {
-  var order = req.params.order
-  var a = await usersCollection.aggregate([
+  var order = req.params.order == "asc" ? 1 : -1
+  
+  var listaMoviesComRating = await usersCollection.aggregate([
     { $unwind: "$movies" },
     {
         $group: {
@@ -99,9 +100,44 @@ router.get('/ratings/:order', async (req, res) => {
             quantidadeRatings: 1
         }
       },
-]).limit(5).sort({"quantidadeRatings":-1}).toArray()
+]).sort({"quantidadeRatings":order}).toArray()
 
-res.json(a)
+res.json(listaMoviesComRating)
+  
+})
+
+router.get('/star', async (req, res) => {
+  
+  var listaMoviesComRating = await usersCollection.aggregate([
+    { $unwind: "$movies" },
+    {
+        $group: {
+            _id: "$movies.movieid",
+            quantidadeRatings: { $max: "$movies.rating" },
+        }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+
+    },
+    { $unwind: "$movieInfo" },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            quantidadeRatings: 1
+        }
+      },
+]).toArray()
+
+res.json(listaMoviesComRating)
   
 })
 
