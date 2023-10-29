@@ -23,11 +23,19 @@ res.json(moviesComComentarios)
   
 })
 
+router.get('/occupation', async (req, res) => {
+  
+  var MoviesComRating = await listaMoviesComRating()
+
+res.json(MoviesComRating)
+  
+})
+
 router.get('/users', async (req, res) => {
   
-  var listaMoviesComRating_v = await listaMoviesComRating()
+  var MoviesComRating = await listaMoviesComRating()
 
-res.json(listaMoviesComRating_v )
+res.json(MoviesComRating)
   
 })
 

@@ -5,7 +5,6 @@ const commentCollection = mongo.collection("comments")
 
 
 
-
 async function obterMovieComRatingMedioEComentarios(condicaoMatch)
 {
   var ratingMovie = await usersCollection.aggregate([
@@ -96,8 +95,7 @@ async function listarMoviesComComentarios(){
         {
             $group : {
                 _id:"$movie_id",
-                comentario : {$first:"$comment"},
-                idComentario : {$first:"$_id"}
+                comentarios: { $sum: 1 }
             },
             
         },
@@ -111,12 +109,17 @@ async function listarMoviesComComentarios(){
         },
         {$unwind:"$moviecomentary"},
         {
-            $project:{
-                _id:"$idComentario",
-                comentario : "$comentario",
-                movie :"$moviecomentary"
+            $project: {
+                _id: "$_id",
+                title: "$moviecomentary.title",
+                genres: "$moviecomentary.genres",
+                ano: "$moviecomentary.ano",
+                comentarios: 1
             }
         },
+        {
+            $sort: {comentarios:1}
+          },
 
     ]).toArray()
 
