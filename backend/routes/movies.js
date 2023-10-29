@@ -2,14 +2,33 @@ const express = require('express')
 const router = express.Router()
 const mongo = require("./../config/mongo.js")
 const tipoObjectId = require("mongodb").ObjectId
+var {obterMovieComRatingMedioEComentarios, listaMoviesComRating,listarMoviesComComentarios} = require("../queryMethods/movies.js")
 
 
 const moviesCollection = mongo.collection("movies")
 const usersCollection = mongo.collection("users")
+const commentCollection = mongo.collection("comments")
+
 
 // middleware that is specific to this router
 router.use((req, res, next) => {
     next()
+})
+
+router.get('/comments', async (req, res) => {
+  
+  var moviesComComentarios = await listarMoviesComComentarios()
+
+res.json(moviesComComentarios)
+  
+})
+
+router.get('/users', async (req, res) => {
+  
+  var listaMoviesComRating_v = await listaMoviesComRating()
+
+res.json(listaMoviesComRating_v )
+  
 })
 
 router.get('/star', async (req, res) => {
@@ -63,19 +82,60 @@ router.get('/top/age/:min_age-:max_age', async (req, res) => {
  var min_ageInteiro = parseInt(req.params.min_age)
  var max_ageInteiro = parseInt(req.params.max_age)
 
-  res.send(movies)
+ var listaMoviesComRating = await usersCollection.aggregate([
+  { $unwind: "$movies" },
+  {
+    $match :{age: {$in:[min_ageInteiro,max_ageInteiro] }}
+  },
+  {
+      $group: {
+          _id: "$movies.movieid",
+          quantidadeRatings: { $count: { } },
+      }
+  },
+  {
+    $lookup: {
+      from: "movies",
+      localField: "_id",
+      foreignField: "_id",
+      as: "movieInfo"
+  }
+
+  },
+  { $unwind: "$movieInfo" },
+  {
+      $project: {
+          _id: 0,
+          title: "$movieInfo.title",
+          year: "$movieInfo.ano",
+          genros:"$movieInfo.genres",
+          quantidadeRatings: 1
+      }
+    },
+]).toArray()
+
+  res.send(listaMoviesComRating)
   
 })
 // Utilizador por ID
 router.get('/:movieid', async (req, res) => {
 
   var id_aprocurar = parseInt(req.params.movieid)
+
+  movies= await obterMovieComRatingMedioEComentarios({"_id":id_aprocurar})
+  if(movies.length<1)
+  movies = await obterMovieComRatingMedioEComentarios({"_id":new tipoObjectId(req.params.movieid)})
+
+  res.send(movies)
+  /*
   
   movies = await moviesCollection.find({"_id":id_aprocurar}).toArray()
   if(movies.length<1)
   movies = await moviesCollection.find({"_id":new tipoObjectId(req.params.movieid)}).toArray()
 
   res.send(movies)
+
+  */
   
 })
 
