@@ -2,7 +2,9 @@ const express = require('express')
 const router = express.Router()
 const mongo = require("./../config/mongo.js")
 const tipoObjectId = require("mongodb").ObjectId
-var {obterMovieComRatingMedioEComentarios, listaMoviesComRating,listarMoviesComComentarios} = require("../queryMethods/movies.js")
+var {obterMovieComRatingMedioEComentarios, listaMoviesComRating,listarMoviesComComentarios,
+  moviesComMais5Estrelas, ratingPorOcupacao
+} = require("../queryMethods/movies.js")
 
 
 const moviesCollection = mongo.collection("movies")
@@ -23,11 +25,19 @@ res.json(moviesComComentarios)
   
 })
 
+router.get('/genres/:genre_name', async (req, res) => {
+  
+  var moviesComComentarios = await listarMoviesComComentarios()
+
+res.json(moviesComComentarios)
+  
+})
+
 router.get('/occupation', async (req, res) => {
   
-  var MoviesComRating = await listaMoviesComRating()
+  var listarRatingPorOcupacao = await ratingPorOcupacao()
 
-res.json(MoviesComRating)
+res.json(listarRatingPorOcupacao)
   
 })
 
@@ -35,53 +45,16 @@ router.get('/users', async (req, res) => {
   
   var MoviesComRating = await listaMoviesComRating()
 
-res.json(MoviesComRating)
+  res.json(MoviesComRating)
   
 })
 
 router.get('/star', async (req, res) => {
   
-  var listaMoviesComRating = await usersCollection.aggregate([
-    { $unwind: "$movies" },
-    {
-      $match : {
-        "movies.rating" : 5
-      }
-    },
-    {
-        $group: {
-            _id: "$movies.movieid",
-            total5stars: { $sum: 1 },
-        }
-    },
-    {
-      $lookup: {
-        from: "movies",
-        localField: "_id",
-        foreignField: "_id",
-        as: "movieInfo"
-    }
+  var listaMoviesComMais5Estrelas = await moviesComMais5Estrelas()
+ 
 
-    },
-    { $unwind: "$movieInfo" },
-    {
-        $project: {
-            _id: 0,
-            title: "$movieInfo.title",
-            year: "$movieInfo.ano",
-            genros:"$movieInfo.genres",
-            total5stars: 1
-        },
-      },
-      {
-        $sort: {total5stars:-1}
-      },
-      {
-        $limit:10
-      }
-]).toArray()
-
-res.json(listaMoviesComRating)
+res.json(listaMoviesComMais5Estrelas)
   
 })
 
@@ -193,7 +166,20 @@ res.send(a)
   
 })
 router.get('/ratings/:order', async (req, res) => {
-  var order = req.params.order == "asc" ? 1 : -1
+  var order
+  switch(req.params.order)
+  {
+    case "asc":
+      order = 1;
+      break;
+    case "desc":
+      order = -1;
+      break;
+    default:
+      res.send("Order não ten valor valido")
+      break;
+
+  }
   
   var listaMoviesComRating = await usersCollection.aggregate([
     { $unwind: "$movies" },

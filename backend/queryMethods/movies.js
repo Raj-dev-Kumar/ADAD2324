@@ -127,6 +127,84 @@ async function listarMoviesComComentarios(){
 
 }
 
+async function moviesComMais5Estrelas(){
+  var listaMoviesComMais5Estrelas = await usersCollection.aggregate([
+    { $unwind: "$movies" },
+    {
+      $match : {
+        "movies.rating" : 5
+      }
+    },
+    {
+        $group: {
+            _id: "$movies.movieid",
+            total5stars: { $sum: 1 },
+        }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+
+    },
+    { $unwind: "$movieInfo" },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            total5stars: 1
+        },
+      },
+      {
+        $sort: {total5stars:-1}
+      },
+      {
+        $limit:10
+      }
+]).toArray()
+
+return listaMoviesComMais5Estrelas
+
+}
+
+async function ratingPorOcupacao(){
+ return await usersCollection.aggregate([
+    {$unwind:"$movies"},
+    {
+      $group:{
+          _id:"$occupation",
+          ratingOcupacao: {$sum:1}
+        
+      }
+    },
+    {
+      $project: {
+        _id:0,
+         ocupacao:"$_id",
+         ratingOcupacao:1
+      }
+    }
+
+
+
+
+  ]).toArray()
+
+
+
+
+
+}
+
+async function topMoviePorGenero(){
+
+  return null
+}
 
 
 
@@ -134,5 +212,8 @@ async function listarMoviesComComentarios(){
 module.exports = {
 obterMovieComRatingMedioEComentarios,
 listaMoviesComRating,
-listarMoviesComComentarios
+listarMoviesComComentarios,
+moviesComMais5Estrelas,
+ratingPorOcupacao,
+topMoviePorGenero
  }
