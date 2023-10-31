@@ -6,6 +6,7 @@ const tipoObjectId = require("mongodb").ObjectId
 
 //Variaveis Globais
 const usercollection = mongo.collection("users")
+const ratingcollection = mongo.collection("ratings_by_user")
 
 router.use((req, res, next) => {
     next()

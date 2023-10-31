@@ -201,11 +201,99 @@ async function ratingPorOcupacao(){
 
 }
 
-async function topMoviePorGenero(){
+async function topMoviePorGenero(genero){
+  var tmpar = [genero]
+console.log(tmpar)
+  return await usersCollection.aggregate([
+    {$unwind:"$movies"},
+    {
+      $group:{
+          _id:"$movies.movieid",
+          top: {$max:"$movies.rating"}
+        
+      }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
 
-  return null
+    },
+    { $unwind: "$movieInfo" },
+    {
+      $match: {
+        "movieInfo.genres":  {
+          $elemMatch: {
+            $eq: genero // Replace "action" with the genre you want to match
+          }
+        }
+      }
+    },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+        },
+      },
+
+
+
+
+  ]).toArray()
 }
 
+async function topMoviePorGeneroAno(genero,ano){
+  var tmpar = [genero]
+console.log(tmpar)
+  return await usersCollection.aggregate([
+    {$unwind:"$movies"},
+    {
+      $group:{
+          _id:"$movies.movieid",
+          top: {$max:"$movies.rating"}
+        
+      }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+
+    },
+    { $unwind: "$movieInfo" },
+    {
+      $match: {
+        "movieInfo.genres":  {
+          $elemMatch: {
+            $eq: genero // Replace "action" with the genre you want to match
+          }
+        },
+        "movieInfo.ano":ano
+
+      }
+    },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+        },
+      },
+
+
+
+
+  ]).toArray()
+}
 
 
 
@@ -215,5 +303,6 @@ listaMoviesComRating,
 listarMoviesComComentarios,
 moviesComMais5Estrelas,
 ratingPorOcupacao,
-topMoviePorGenero
+topMoviePorGenero,
+topMoviePorGeneroAno
  }

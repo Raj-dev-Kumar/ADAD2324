@@ -3,7 +3,7 @@ const router = express.Router()
 const mongo = require("./../config/mongo.js")
 const tipoObjectId = require("mongodb").ObjectId
 var {obterMovieComRatingMedioEComentarios, listaMoviesComRating,listarMoviesComComentarios,
-  moviesComMais5Estrelas, ratingPorOcupacao
+  moviesComMais5Estrelas, ratingPorOcupacao, topMoviePorGenero,topMoviePorGeneroAno
 } = require("../queryMethods/movies.js")
 
 
@@ -25,11 +25,22 @@ res.json(moviesComComentarios)
   
 })
 
+router.get('/genres/:genre_name/:year', async (req, res) => {
+  
+  var generoProcurar = req.params.genre_name
+  var anoProcurar = req.params.year
+  var listarTopMoviesGenero = await topMoviePorGeneroAno(generoProcurar,anoProcurar)
+
+res.json(listarTopMoviesGenero)
+  
+})
+
 router.get('/genres/:genre_name', async (req, res) => {
   
-  var moviesComComentarios = await listarMoviesComComentarios()
+  var generoProcurar = req.params.genre_name
+  var listarTopMoviesGenero = await topMoviePorGenero(generoProcurar)
 
-res.json(moviesComComentarios)
+res.json(listarTopMoviesGenero)
   
 })
 
@@ -46,6 +57,35 @@ router.get('/users', async (req, res) => {
   var MoviesComRating = await listaMoviesComRating()
 
   res.json(MoviesComRating)
+  
+})
+
+router.get('/originaltitle', async (req, res) => {
+  
+  var arrayToReturn = []
+  var tmpArray = []
+
+
+  await moviesCollection.find({}).limit(50).forEach(el =>{
+    try{
+    var originalTitle = str.substring(
+      str.indexOf("(") + 1, 
+      str.lastIndexOf(")"))
+      tmpArray.push(el)
+      tmpArray[0].originaltitle = originalTitle
+      arrayToReturn.push(tmpArray[0])
+      tmpArray = []
+
+    }
+    catch{
+        arrayToReturn.push(el)
+    }
+
+    return arrayToReturn
+
+  })
+
+ 
   
 })
 
