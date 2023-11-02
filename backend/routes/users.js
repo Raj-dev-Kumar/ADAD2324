@@ -62,7 +62,20 @@ router.put('/:userid', async (req, res) => {
       ocupation : req.body.ocupation,
       movies : req.body.movies
     }})
+
+    if(updateUsers.matchedCount <1)
+    var updateUsers =  await usercollection.updateMany({"_id":new tipoObjectId(req.params.userid)},{$set: 
+      {
+        name : req.body.name,
+        gender : req.body.gender,
+        age : req.body.age,
+        ocupation : req.body.ocupation,
+        movies : req.body.movies
+      }})
   res.json({"Resultado":updateUsers})
+
+
+
 })
 
 module.exports = router

@@ -37,7 +37,7 @@ async function obterMovieComRatingMedioEComentarios(condicaoMatch)
       },
     },
     {
-      $sort: {total5stars:-1}
+      $sort: {ratingMedio:-1}
     },
     {
       $limit:10
@@ -295,7 +295,106 @@ console.log(tmpar)
   ]).toArray()
 }
 
+async function moviesComRating(){
 
+  return await usersCollection.aggregate([
+    { $unwind: "$movies" },
+    {
+        $group: {
+            _id: "$movies.movieid",
+            quantidadeRatings: { $count: { } },
+        }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+
+    },
+    { $unwind: "$movieInfo" },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            quantidadeRatings: 1
+        }
+      },
+])
+
+}
+
+async function moviesComRatingTop(){
+
+  return await usersCollection.aggregate([
+    { $unwind: "$movies" },
+    {
+        $group: {
+            _id: "$movies.movieid",
+            averageRating: { $avg: "$movies.rating" },
+        }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+
+    },
+    { $unwind: "$movieInfo" },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            averageRating: 1
+        }
+      },
+])
+}
+
+async function numeroRatingIdadesEntre(minIdade, maxIdade){
+  
+  return await usersCollection.aggregate([
+    { $unwind: "$movies" },
+    {
+      $match :{age: {$in:[minIdade,maxIdade] }}
+    },
+    {
+        $group: {
+            _id: "$movies.movieid",
+            quantidadeRatings: { $count: { } },
+        }
+    },
+    {
+      $lookup: {
+        from: "movies",
+        localField: "_id",
+        foreignField: "_id",
+        as: "movieInfo"
+    }
+  
+    },
+    { $unwind: "$movieInfo" },
+    {
+        $project: {
+            _id: 0,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            quantidadeRatings: 1
+        }
+      },
+  ]).toArray()
+
+}
 
 module.exports = {
 obterMovieComRatingMedioEComentarios,
@@ -304,5 +403,8 @@ listarMoviesComComentarios,
 moviesComMais5Estrelas,
 ratingPorOcupacao,
 topMoviePorGenero,
-topMoviePorGeneroAno
+topMoviePorGeneroAno,
+moviesComRating,
+moviesComRatingTop,
+numeroRatingIdadesEntre
  }
