@@ -39,15 +39,11 @@ async function obterMovieComRatingMedioEComentarios(condicaoMatch)
     {
       $sort: {ratingMedio:-1}
     },
-    {
-      $limit:10
-    }
+
 ]).toArray()
 
 return ratingMovie
 }
-
-
 
 
 
@@ -202,8 +198,6 @@ async function ratingPorOcupacao(){
 }
 
 async function topMoviePorGenero(genero){
-  var tmpar = [genero]
-console.log(tmpar)
   return await usersCollection.aggregate([
     {$unwind:"$movies"},
     {
