@@ -28,12 +28,21 @@ async function obterMovieComRatingMedioEComentarios(condicaoMatch)
 },
   { $unwind: "$movieInfo" },
   {
+    $lookup: {
+      from: "comments",
+      localField: "movieInfo._id",
+      foreignField: "movie_id",
+      as: "comentarios",
+  },
+  },
+  {
       $project: {
           _id: 0,
           title: "$movieInfo.title",
           year: "$movieInfo.ano",
           genros:"$movieInfo.genres",
-          ratingMedio: "$ratingMedio"
+          ratingMedio: "$ratingMedio",
+          comentario :"$comentarios.comment"
       },
     },
     {

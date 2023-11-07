@@ -17,6 +17,57 @@ router.use((req, res, next) => {
     next()
 })
 
+router.get('/user/ratings', async (req, res) => {
+  
+  var ratingMovie = await usersCollection.aggregate([
+    {$limit:1},
+    { $unwind: "$movies" },
+    {
+    $lookup: {
+      from: "movies",
+      localField: "movies.movieid",
+      foreignField: "_id",
+      as: "movieInfo",
+    }
+  },
+    {
+        $group: {
+            _id: "$_id",
+            ratings: {
+              $push: {
+                movieid: "$movies.movieid",
+                rating: "$movies.rating",
+                movietitle:"$movieInfo.title"
+              }
+            },
+            user_name: {$first:"$name"},
+            user_id: {$first:"_id"}
+            
+        }
+    },
+  {
+      $project: {
+          _id:0,
+          user_id:"$_id",
+          user_name:1,
+          ratings:1
+          
+      },
+    },
+    {
+      $out:"ratings_by_user"
+    },
+   // {
+     // $out: "ratings_by_user"
+    //},
+
+
+]).toArray()
+
+res.json(ratingMovie)
+  
+})
+
 router.get('/comments', async (req, res) => {
   
   var moviesComComentarios = await listarMoviesComComentarios()
