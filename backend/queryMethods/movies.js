@@ -399,6 +399,97 @@ async function numeroRatingIdadesEntre(minIdade, maxIdade){
 
 }
 
+
+async function originalTitle(){
+  const aggregationPipeline = [
+    {
+      $match: {
+        title: { $exists: true, $type: "string" } // Filter out null and non-string values
+      }
+    },
+    {
+      $limit: 20
+    },
+    {
+      $addFields: {
+        original_title: {
+          $let: {
+            vars: {
+              titleParts: { $split: ["$title", "("] }
+            },
+            in: {
+              $cond: {
+                if: { $isArray: "$$titleParts" },
+                then: {
+                  $trim: {
+                    input: {
+                      $arrayElemAt: ["$$titleParts", 1]
+                    },
+                    chars: ")"
+                  }
+                },
+                else: null
+              }
+            }
+          }
+        }
+      }
+    }
+  ];
+  const result = await moviesCollection.aggregate(aggregationPipeline).toArray();
+
+  return result
+}
+
+async function ratingPorUser(){
+
+  return await usersCollection.aggregate([
+    {$limit:1},
+    { $unwind: "$movies" },
+    {
+    $lookup: {
+      from: "movies",
+      localField: "movies.movieid",
+      foreignField: "_id",
+      as: "movieInfo",
+    }
+  },
+    {
+        $group: {
+            _id: "$_id",
+            ratings: {
+              $push: {
+                movieid: "$movies.movieid",
+                rating: "$movies.rating",
+                movietitle:"$movieInfo.title"
+              }
+            },
+            user_name: {$first:"$name"},
+            user_id: {$first:"_id"}
+            
+        }
+    },
+  {
+      $project: {
+          _id:0,
+          user_id:"$_id",
+          user_name:1,
+          ratings:1
+          
+      },
+    },
+    {
+      $out:"ratings_by_user"
+    },
+   // {
+     // $out: "ratings_by_user"
+    //},
+
+
+]).toArray()
+}
+
+
 module.exports = {
 obterMovieComRatingMedioEComentarios,
 listaMoviesComRating,
@@ -409,5 +500,7 @@ topMoviePorGenero,
 topMoviePorGeneroAno,
 moviesComRating,
 moviesComRatingTop,
-numeroRatingIdadesEntre
+numeroRatingIdadesEntre,
+originalTitle,
+ratingPorUser
  }

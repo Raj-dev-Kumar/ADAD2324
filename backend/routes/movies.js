@@ -5,7 +5,7 @@ const tipoObjectId = require("mongodb").ObjectId
 var {
   obterMovieComRatingMedioEComentarios, listaMoviesComRating,listarMoviesComComentarios,
   moviesComMais5Estrelas, ratingPorOcupacao, topMoviePorGenero,topMoviePorGeneroAno, moviesComRating,
-  moviesComRatingTop,numeroRatingIdadesEntre
+  moviesComRatingTop,numeroRatingIdadesEntre, originalTitle,ratingPorUser
 } = require("../queryMethods/movies.js")
 
 
@@ -17,193 +17,264 @@ router.use((req, res, next) => {
     next()
 })
 
-router.get('/user/ratings', async (req, res) => {
-  
-  var ratingMovie = await usersCollection.aggregate([
-    {$limit:1},
-    { $unwind: "$movies" },
-    {
-    $lookup: {
-      from: "movies",
-      localField: "movies.movieid",
-      foreignField: "_id",
-      as: "movieInfo",
-    }
-  },
-    {
-        $group: {
-            _id: "$_id",
-            ratings: {
-              $push: {
-                movieid: "$movies.movieid",
-                rating: "$movies.rating",
-                movietitle:"$movieInfo.title"
-              }
-            },
-            user_name: {$first:"$name"},
-            user_id: {$first:"_id"}
-            
-        }
-    },
-  {
-      $project: {
-          _id:0,
-          user_id:"$_id",
-          user_name:1,
-          ratings:1
-          
-      },
-    },
-    {
-      $out:"ratings_by_user"
-    },
-   // {
-     // $out: "ratings_by_user"
-    //},
+router.post('/user/ratings', async (req, res) => {
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try{
+    var ratingMovie = await ratingPorUser()
+    statuscode = 200
+    objectoReturnar = {"sucesso":"SUCESSO"}
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Error":"Erro ao listar comentarios"}
+  }
 
 
-]).toArray()
-
-res.json(ratingMovie)
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/comments', async (req, res) => {
-  
-  var moviesComComentarios = await listarMoviesComComentarios()
+  statuscode = undefined
+  objectoReturnar = undefined
 
-res.json(moviesComComentarios)
-  
+  try {
+        var moviesComComentarios = await listarMoviesComComentarios()
+        statuscode = 200
+        objectoReturnar = moviesComComentarios
+  }
+  catch{
+        statuscode = 500
+        objectoReturnar = {"Error":"Erro ao listar comentarios"}
+  }
+
+res.status(statuscode).json(objectoReturnar)
 })
 
 router.get('/genres/:genre_name/:year', async (req, res) => {
-  
+  statuscode = undefined
+  objectoReturnar = undefined
+
   var generoProcurar = req.params.genre_name
   var anoProcurar = req.params.year
-  var listarTopMoviesGenero = await topMoviePorGeneroAno(generoProcurar,anoProcurar)
 
-res.json(listarTopMoviesGenero)
+  try{
+        var listarTopMoviesGenero = await topMoviePorGeneroAno(generoProcurar,anoProcurar)
+        statuscode = 200
+        objectoReturnar = listarTopMoviesGenero
+  }
+  catch{
+        statuscode = 500
+        objectoReturnar = {"Error":"Erro ao listar movies, genero e ano"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/genres/:genre_name', async (req, res) => {
   
-  var generoProcurar = req.params.genre_name
-  var listarTopMoviesGenero = await topMoviePorGenero(generoProcurar)
+  statuscode = undefined
+  objectoReturnar = undefined
 
-res.json(listarTopMoviesGenero)
+  var generoProcurar = req.params.genre_name
+
+  try {
+        var listarTopMoviesGenero = await topMoviePorGenero(generoProcurar)
+        statuscode = 200
+        objectoReturnar = listarTopMoviesGenero
+  }
+
+  catch {
+    statuscode = 500
+    objectoReturnar = {"Error":"Erro a obter Top Movie por Genero"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/occupation', async (req, res) => {
-  
-  var listarRatingPorOcupacao = await ratingPorOcupacao()
 
-res.json(listarRatingPorOcupacao)
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try{
+    var listarRatingPorOcupacao = await ratingPorOcupacao()
+    statuscode = 200
+    objectoReturnar = listarRatingPorOcupacao
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Error":"Erro a obter Top Movies"}
+  }
+  
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/users', async (req, res) => {
   
-  var MoviesComRating = await listaMoviesComRating()
+  statuscode = undefined
+  objectoReturnar = undefined
+  try{
+    var MoviesComRating = await listaMoviesComRating()
+    statuscode = 200
+    objectoReturnar = MoviesComRating
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Error":"Ocorreu algum erro"}
+  }
 
-  res.json(MoviesComRating)
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/originaltitle', async (req, res) => {
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try{
+    const result = await originalTitle()
+    statuscode = 200
+    objectoReturnar = result
+  }
+
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Error":"Ocorreu algum erro"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
-  var arrayToReturn = []
-  var tmpArray = []
-
-
-  await moviesCollection.find({}).limit(50).forEach(el =>{
-    try{
-
-    var extrairTituloOriginal = str.substring(
-      str.indexOf("(") + 1, 
-      str.lastIndexOf(")"))
-
-      // Insere o movie ao array temporariro
-      tmpArray.push(el)
-
-      //adiciona o campo originaltitle ao movie que está dentro do array
-      tmpArray[0].originaltitle = extrairTituloOriginal
-
-      // Uma vez que o movie já tem o campo originaltitle, o movie é adicionado ao array
-      arrayToReturn.push(tmpArray[0])
-
-      // Array temporario é limpo, para que o novo filme fique sempre na posição 0
-      tmpArray = []
-
-    }
-    catch{
-        arrayToReturn.push(el)
-    }
-
-    return arrayToReturn
-
-  })
-
-
 
 })
 
 router.get('/star', async (req, res) => {
-  
-  var listaMoviesComMais5Estrelas = await moviesComMais5Estrelas()
- 
 
-res.json(listaMoviesComMais5Estrelas)
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try {
+    var listaMoviesComMais5Estrelas = await moviesComMais5Estrelas()
+    statuscode = 200
+    objectoReturnar = listaMoviesComMais5Estrelas
+  }
+
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Error":"Ocorreu algum erro"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/top/age/:min_age-:max_age', async (req, res) => {
 
- var min_ageInteiro = parseInt(req.params.min_age)
- var max_ageInteiro = parseInt(req.params.max_age)
+  statuscode = undefined
+  objectoReturnar = undefined
 
- var listaMoviesComRatingIdadesEntre = await numeroRatingIdadesEntre(min_ageInteiro,max_ageInteiro)
+  try{
+    var min_ageInteiro = parseInt(req.params.min_age)
+    var max_ageInteiro = parseInt(req.params.max_age)
+   
+    var listaMoviesComRatingIdadesEntre = await numeroRatingIdadesEntre(min_ageInteiro,max_ageInteiro)
+    statuscode = 200
+    objectoReturnar =listaMoviesComRatingIdadesEntre
+  }
 
-  res.send(listaMoviesComRatingIdadesEntre)
+  catch {
+    statuscode = 500
+    objectoReturnar = {"Erro":"Erro obtida"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 // Utilizador por ID
 router.get('/:movieid', async (req, res) => {
 
+  statuscode = undefined
+  objectoReturnar = undefined
   var id_aprocurar = parseInt(req.params.movieid)
 
-  movies= await obterMovieComRatingMedioEComentarios({"_id":id_aprocurar})
-  if(movies.length<1)
-  movies = await obterMovieComRatingMedioEComentarios({"_id":new tipoObjectId(req.params.movieid)})
+  try{
+    movies= await obterMovieComRatingMedioEComentarios({"_id":id_aprocurar})
+    if(movies.length<1)
+    movies = await obterMovieComRatingMedioEComentarios({"_id":new tipoObjectId(req.params.movieid)})
+    statuscode = 200
+  objectoReturnar = movies
+  }
+catch{
 
-  res.send(movies)
+  statuscode = 500
+  objectoReturnar = {"Erro":"Erro a obter Movie"}
+
+}
+
+res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.delete('/:movieid', async (req, res) => {
 
+  statuscode = undefined
+  objectoReturnar = undefined
+
   var id_aprocurar = parseInt(req.params.movieid)
 
-  var EliminarMovie = await moviesCollection.deleteMany({"_id":id_aprocurar})
-  if (EliminarMovie.deletedCount <1 )
-  EliminarMovie = await moviesCollection.deleteMany({"_id":new tipoObjectId(req.params.movieid)})
+  try{
+    var EliminarMovie = await moviesCollection.deleteMany({"_id":id_aprocurar})
+    if (EliminarMovie.deletedCount <1 )
+    EliminarMovie = await moviesCollection.deleteMany({"_id":new tipoObjectId(req.params.movieid)})
+
+    statuscode = 200
+    objectoReturnar = EliminarMovie
+
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Erro":"Erro ao apagar Movie"}
+  }
+
+
   
-  res.json({"Resultado":EliminarMovie})
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 router.get('/higher/:num_movies', async (req, res) => {
-  var maximo = parseInt(req.params.num_movies)
-  var listarMoviesComTopRating = await moviesComRatingTop()
-  .limit(maximo)
-  .sort({"averageRating":-1})
-  .toArray()
 
-res.send(listarMoviesComTopRating)
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try{
+    var maximo = parseInt(req.params.num_movies)
+    var listarMoviesComTopRating = await moviesComRatingTop()
+    .limit(maximo)
+    .sort({"averageRating":-1})
+    .toArray()
+
+    statuscode = 200
+    objectoReturnar = listarMoviesComTopRating
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Erro":"Erro ao listar movies"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 router.get('/ratings/:order', async (req, res) => {
+  statuscode = undefined
+  objectoReturnar = undefined
+
   var order
   switch(req.params.order)
   {
@@ -214,14 +285,23 @@ router.get('/ratings/:order', async (req, res) => {
       order = -1;
       break;
     default:
-      res.send("Order não tem valor valido")
+      res.status(500).json({"Erro":"Parametro apenas pode ser asc ou desc"})
       break;
 
   }
-  
-  var listaMoviesComRating = moviesComRating().sort({"quantidadeRatings":order}).toArray()
+  try{
+    var listaMoviesComRating = moviesComRating().sort({"quantidadeRatings":order}).toArray()
+    statuscode = 200
+    objectoReturnar = listaMoviesComRating
+  }
 
-res.json(listaMoviesComRating)
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Erro":"Erro ao listar os movies"}
+  }
+  
+
+res.status(statuscode).json(objectoReturnar)
   
 })
 
@@ -230,15 +310,41 @@ res.json(listaMoviesComRating)
 
 router.post('/', async (req, res) => {
 
-  var adicionarMovies = await moviesCollection.insertMany(req.body.movies)
-  res.json({"Resultado":adicionarMovies})
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try{
+    var adicionarMovies = await moviesCollection.insertMany(req.body.movies)
+    statuscode = 200
+    objectoReturnar =adicionarMovies
+
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Erro":"erro ao adicionar movies"}
+  }
+
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
 // Todos os utilizadores - (Limitado a 50)
 router.get('/', async (req, res) => {
-  movies = await moviesCollection.find({}).limit(50).toArray()
-  res.send(movies)
+
+  statuscode = undefined
+  objectoReturnar = undefined
+
+  try{
+    movies = await moviesCollection.find({}).limit(50).toArray()
+    statuscode = 200
+    objectoReturnar = movies
+  }
+  catch{
+    statuscode = 500
+    objectoReturnar = {"Erro": "Erro ao obter movies"}
+
+  }
+  res.status(statuscode).json(objectoReturnar)
   
 })
 
