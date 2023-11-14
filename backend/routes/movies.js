@@ -255,10 +255,7 @@ router.get('/higher/:num_movies', async (req, res) => {
 
   try{
     var maximo = parseInt(req.params.num_movies)
-    var listarMoviesComTopRating = await moviesComRatingTop()
-    .limit(maximo)
-    .sort({"averageRating":-1})
-    .toArray()
+    var listarMoviesComTopRating = await moviesComRatingTop(maximo)
 
     statuscode = 200
     objectoReturnar = listarMoviesComTopRating
@@ -289,13 +286,16 @@ router.get('/ratings/:order', async (req, res) => {
       break;
 
   }
+
+  console.log(order)
   try{
-    var listaMoviesComRating = moviesComRating().sort({"quantidadeRatings":order}).toArray()
+    var listaMoviesComRating = await moviesComRating(order)
     statuscode = 200
     objectoReturnar = listaMoviesComRating
   }
 
-  catch{
+  catch (e){
+    console.log(e)
     statuscode = 500
     objectoReturnar = {"Erro":"Erro ao listar os movies"}
   }

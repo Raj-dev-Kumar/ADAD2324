@@ -298,7 +298,7 @@ console.log(tmpar)
   ]).toArray()
 }
 
-async function moviesComRating(){
+async function moviesComRating(order){
 
   return await usersCollection.aggregate([
     { $unwind: "$movies" },
@@ -327,11 +327,11 @@ async function moviesComRating(){
             quantidadeRatings: 1
         }
       },
-])
+]).sort({"quantidadeRatings":order}).toArray()
 
 }
 
-async function moviesComRatingTop(){
+async function moviesComRatingTop(maximo){
 
   return await usersCollection.aggregate([
     { $unwind: "$movies" },
@@ -360,7 +360,9 @@ async function moviesComRatingTop(){
             averageRating: 1
         }
       },
-])
+]).limit(maximo)
+.sort({"averageRating":-1})
+.toArray()
 }
 
 async function numeroRatingIdadesEntre(minIdade, maxIdade){
