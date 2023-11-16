@@ -436,6 +436,11 @@ async function originalTitle(){
           }
         }
       }
+    },
+    {
+      $match:{
+        original_title: { $exists: true, $type: "string" }
+      }
     }
   ];
   const result = await moviesCollection.aggregate(aggregationPipeline).toArray();
