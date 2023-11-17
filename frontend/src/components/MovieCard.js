@@ -15,7 +15,7 @@ function MovieCard(props) {
           })}
         </Card.Text>
         <Card.Text>
-          Year: {props.year}
+          Year: {props.ano}
         </Card.Text>
         <Button href={"/movie/" + props._id} variant="outline-primary">Open Movie</Button>
       </Card.Body>
