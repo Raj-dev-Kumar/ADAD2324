@@ -28,17 +28,18 @@ export default function App() {
   }, []);
 
   return (
-    <div className="container pt-5 pb-5">
+    <div className="container pt-5 pb-5" >
       <h2>Users</h2>
-
+        <div className="row">
             {users && users.map((user) => {
               return(
-               <div>
+               <div className="col-lg-4">
                <Profile user={user}/>
                {console.log(user)}
                 </div>
                 )
             })}
+            </div>
     </div>
   )
 }
