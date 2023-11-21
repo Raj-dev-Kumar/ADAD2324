@@ -6,13 +6,43 @@ import {
 } from '@stacks/transactions';
 import { utf8ToBytes } from '@stacks/common';
 import { userSession } from '../auth';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Card from 'react-bootstrap/Card';
 const bytes = utf8ToBytes('foo'); 
 const bufCV = bufferCV(bytes);
+
+const genreBubbleStyle = {
+  display: 'inline-block',
+  backgroundColor: 'lightgreen',
+  borderRadius: '10px',
+  padding: '2px',
+  margin: '2px',
+};
+const ratingBubbleStyle = {
+  display: 'inline-block',
+  backgroundColor: 'darkblue',
+  color: 'white',
+  borderRadius: '10px',
+  padding: '5px',
+  margin: '5px',
+};
 
 export default function App() {
   let params = useParams();
   let [movies, setMovies] = useState([]);
+  const [comment_index, setCommentIndex] = useState(0);
+
+  const [loadingText, setLoadingText] = useState("Loading");
   let [isloading, setLoading] = useState(true);
+
+  function handleClickUp() {
+    setCommentIndex(comment_index + 1);
+  }
+
+  function handleClickDown() {
+    setCommentIndex(comment_index - 1);
+  }
 
   const getMovies = async () => {
     try {
@@ -68,8 +98,30 @@ export default function App() {
     getMovies();
   }, [movies]);
 
+  useEffect(() => {
+    setLoading(true); // Set loading to true when params.id changes
+    const interval = setInterval(() => {
+      setLoadingText((prevText) => {
+        switch (prevText) {
+          case "Loading.":
+            return "Loading..";
+          case "Loading..":
+            return "Loading...";
+          default:
+            return "Loading.";
+        }
+      });
+    }, 500); // Update every 500 milliseconds
+
+      return () => clearInterval(interval); // Cleanup interval on component unmount
+    }, [params.id]);
+
   if (isloading){
-    return (<h2>carregar</h2>)
+    return (
+      <div className="container pt-5 pb-5">
+        <h2>{loadingText}</h2>
+      </div>
+    );
   }
   else
   return (
@@ -77,9 +129,71 @@ export default function App() {
       <h2>Movie page - {movies[0].title}</h2>
       <p>{movies? movies.title : "a carregar"}</p>
       {console.log(movies)}
+      <div>
+    <Card style={{ width: '30rem' , backgroundColor: '#f7f7f7'}} className="mb-3">
+    <Card.Body>
+      <Card.Title>{movies[0].title.split("(")[0]}</Card.Title>
+      <Card.Text>
+        <p> Original Title: {movies[0].title.split(/[()]/)[1] ? movies[0].title.split(/[()]/)[1] : movies[0].title.split("(")[0]}
+        <br></br>
+        Year: {movies[0].year}
+        <br></br>
+        Genres: {movies[0].genros.map((genre, index) => (
+              <span key={index} style={genreBubbleStyle}>
+                {genre}
+              </span>
+            ))}
+        </p>
+        <p>
+          <span style={ratingBubbleStyle}>
+              ⭐Rating: {movies[0].ratingMedio.toFixed(2)}/5
+          </span>
+        </p>
+      </Card.Text>
+        <ButtonGroup>
+          <Button name="PrevButton" href={"/movie/" + (parseInt(params.id)-1)} disabled={(parseInt(params.id)-1)<=0? true : false} variant="outline-secondary" size="sm">Previous Movie</Button>
+          <Button name="NextButton"href={"/movie/" + (parseInt(params.id)+1)} variant="outline-primary" color="yellow" size="sm">Next Movie</Button>
+        </ButtonGroup>
+    </Card.Body>
+    </Card>
+    <Card style={{ width: '80rem' , height: '300px', backgroundColor: '#f7f7f7'}} className="mb-3">
+    <Card.Body style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+      <div>
+        <Card.Title>Comments:</Card.Title>
+        <Card.Text>
+          <p style={{ marginBottom: '10px' }}>{movies[0].comentario[comment_index]}</p>
+        </Card.Text>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <ButtonGroup style={{ marginBottom: '10px' }}>
+          <Button 
+            name="PrevButton"  
+            count={comment_index} 
+            onClick={handleClickDown} 
+            disabled={comment_index==0? true : false} 
+            variant="outline-secondary" 
+            size="sm" 
+            style={{ width: '100px' }}>
+              Previous
+          </Button>
+          <Button 
+            name="NextButton" 
+            count={comment_index} 
+            onClick={handleClickUp} 
+            disabled={movies[0].comentario[parseInt(comment_index+1)]==null? true : false} 
+            variant="outline-primary" 
+            size="sm" 
+            style={{ width: '100px' }}>
+              Next
+          </Button>
+        </ButtonGroup>
+        <p style={{fontSize: '0.8em', color: '#555', fontWeight: 'bold' }}>{comment_index+1}/{movies[0].comentario.length}</p>
+        </div>
+    </Card.Body>
+    </Card>
+    </div>
 
       {userSession.isUserSignedIn() ? <a href="#" onClick={submitMessage }>Blockchain transaction</a> : null}
-      
-    </div>
+      </div>
   )
 }
