@@ -7,7 +7,7 @@ export const userSession = new UserSession({ appConfig });
 export function authenticate() {
   showConnect({
     appDetails: {
-      name: 'ADAD Project',
+      name: 'Projeto ADAD 2324 grupo 10',
       icon: window.location.origin + '/logo512.png',
     },
     redirectTo: '/',
