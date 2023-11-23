@@ -15,17 +15,46 @@ const bufCV = bufferCV(bytes);
 const genreBubbleStyle = {
   display: 'inline-block',
   borderRadius: '10px',
-  padding: '2px',
-  margin: '2px',
+  backgroundColor: 'lightgreen',
+  padding: '5px',
+  margin: '5px',
 };
+
+const genreColorMap = {
+  "Action": '#f3241f',
+  "Drama": '#48a5fa', 
+  "Comedy": '#ffa07a', 
+  "Children's": '#4caf50', 
+  "Thriller": '#f555f5', 
+  "Sci-Fi": '#00ffff', 
+  "Romance": '#FF4081', 
+  "Adventure": '#FF6F61', 
+  "Crime": '#bf6239',
+  "Horror": '#7a7b8e', 
+  "Musical": '#b1ff00', 
+  "Documentary": '#87ceeb',  
+  "Mystery": '#a165a1',
+  "Animation": '#ffd700', 
+};
+
+function getGenreBubbleStyle(genre){
+  return{
+    ...genreBubbleStyle,
+    backgroundColor: genreColorMap[genre] || 'lightgreen'
+  }
+}
+
+
 const ratingBubbleStyle = {
   display: 'inline-block',
   backgroundColor: 'darkblue',
   color: 'white',
   borderRadius: '10px',
+  fontWeight: 'bold',
   padding: '5px',
   margin: '5px',
 };
+
 
 export default function App() {
   let params = useParams();
@@ -93,6 +122,7 @@ export default function App() {
     
   };
 
+
   useEffect(() => {
     getMovies();
   }, [movies]);
@@ -133,29 +163,59 @@ export default function App() {
     <Card.Body>
       <Card.Title>{movies[0].title.split("(")[0]}</Card.Title>
       <Card.Text>
-        <p> Original Title: {movies[0].title.split(/[()]/)[1] ? movies[0].title.split(/[()]/)[1] : movies[0].title.split("(")[0]}
+        <p>
+        <span style={{ fontWeight: 'bold' }}>
+          Original Title:
+        </span>
+          {movies[0].title.split(/[()]/)[1] ? " " + movies[0].title.split(/[()]/)[1] : " " + movies[0].title.split("(")[0]}
         <br></br>
-        Year: {movies[0].year}
+        <span style={{ fontWeight: 'bold' }}>
+          Year: 
+        </span> 
+          {" " + movies[0].year}
         <br></br>
-        Genres: {movies[0].genros.map((genre, index) => (
-              <span key={index} style={genreBubbleStyle}>
+        <span style={{ fontWeight: 'bold' }}>        
+          Genres:
+        <br></br>
+        {movies[0].genros.map((genre, index) => (
+              <span key={index} style={getGenreBubbleStyle(genre)}>
                 {genre}
               </span>
             ))}
+        </span> 
         </p>
         <p>
           <span style={ratingBubbleStyle}>
-              ⭐Rating: {movies[0].ratingMedio.toFixed(2)}/5
+              ⭐ Rating: {" " + movies[0].ratingMedio.toFixed(2)}/5 
           </span>
         </p>
       </Card.Text>
         <ButtonGroup>
-          <Button name="PrevButton" href={"/movie/" + (parseInt(params.id)-1)} disabled={(parseInt(params.id)-1)<=0? true : false} variant="outline-secondary" size="sm">Previous Movie</Button>
-          <Button name="NextButton"href={"/movie/" + (parseInt(params.id)+1)} variant="outline-primary" color="yellow" size="sm">Next Movie</Button>
+          <Button 
+            name="PrevButton" 
+            href={"/movie/" + (parseInt(params.id)-1)} 
+            disabled={(parseInt(params.id)-1)<=0? true : false} 
+            variant="outline-secondary" 
+            size="sm"
+            style={{ fontWeight: 'bold' }}>
+              Previous Movie
+          </Button>
+          <Button 
+            name="NextButton"
+            href={"/movie/" + (parseInt(params.id)+1)} 
+            variant="outline-primary" 
+            size="sm"
+            style={{ fontWeight: 'bold' }}>
+              Next Movie
+            </Button>
         </ButtonGroup>
     </Card.Body>
     </Card>
-    <Card style={{ width: '80rem' , height: '300px', backgroundColor: '#f7f7f7'}} className="mb-3">
+    <div>
+    {movies[0].comentario[0]!=null &&
+    <Card
+    style={{ width: '80rem' , height: '300px', backgroundColor: '#f7f7f7'}} 
+    className="mb-3">
     <Card.Body style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
       <div>
         <Card.Title>Comments:</Card.Title>
@@ -172,7 +232,7 @@ export default function App() {
             disabled={comment_index==0? true : false} 
             variant="outline-secondary" 
             size="sm" 
-            style={{ width: '100px' }}>
+            style={{ width: '100px' , fontWeight: 'bold' }}>
               Previous
           </Button>
           <Button 
@@ -190,6 +250,8 @@ export default function App() {
         </div>
     </Card.Body>
     </Card>
+    }
+    </div>
     </div>
 
       {userSession.isUserSignedIn() ? <a href="#" onClick={submitMessage }>Blockchain transaction</a> : null}
