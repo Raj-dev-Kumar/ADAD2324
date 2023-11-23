@@ -14,7 +14,6 @@ const bufCV = bufferCV(bytes);
 
 const genreBubbleStyle = {
   display: 'inline-block',
-  backgroundColor: 'lightgreen',
   borderRadius: '10px',
   padding: '2px',
   margin: '2px',
@@ -183,7 +182,7 @@ export default function App() {
             disabled={movies[0].comentario[parseInt(comment_index+1)]==null? true : false} 
             variant="outline-primary" 
             size="sm" 
-            style={{ width: '100px' }}>
+            style={{ width: '100px' , fontWeight: 'bold' }}>
               Next
           </Button>
         </ButtonGroup>
