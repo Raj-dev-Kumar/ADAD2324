@@ -197,6 +197,63 @@ router.get('/top/age/:min_age-:max_age', async (req, res) => {
   
 })
 // Utilizador por ID
+router.get('/menga1/:movieid', async (req, res) => {
+
+  statuscode = undefined
+  objectoReturnar = undefined
+  var id_aprocurar = parseInt(req.params.movieid)
+
+  try{
+    var ratingMovie = await usersCollection.aggregate([
+      { $unwind: "$movies" },
+      {
+        $match:{"_id":9}
+    },
+      {
+          $group: {
+              _id: "$movies.movieid",
+              name:{$first:"$name"}
+          }
+      },
+      {
+        $lookup: {
+          from: "movies",
+          localField: "_id",
+          foreignField: "_id",
+          as: "movieInfo",
+      },
+      
+    },
+    { $unwind: "$movieInfo" },
+    {
+      $match:{"movieInfo._id":id_aprocurar}
+  },
+    {
+        $project: {
+            _id: 1,
+            title: "$movieInfo.title",
+            year: "$movieInfo.ano",
+            genros:"$movieInfo.genres",
+            nome:"$name"
+        },
+      },
+  
+  ]).toArray()
+  objectoReturnar = ratingMovie;
+  statuscode = 200
+  }
+catch{
+
+  statuscode = 500
+  objectoReturnar = {"Erro":"Erro a obter Movie"}
+
+}
+
+res.status(statuscode).json(objectoReturnar)
+  
+})
+
+
 router.get('/:movieid', async (req, res) => {
 
   statuscode = undefined
