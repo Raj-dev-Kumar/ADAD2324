@@ -15,6 +15,7 @@ import Navigation from "./components/Navigation";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import Users from "./pages/Users";
+import User from "./pages/User";
 import Movie from "./pages/Movie";
 import Footer from './components/Footer';
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/movies" element={<Movies />} />
           <Route path="/users" element={<Users />} />
           <Route path="/movie/:id" element={<Movie />} />
+          <Route path="/user/:id" element={<User />} />
         </Routes>
         <Footer />
       </Router>

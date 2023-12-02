@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 const mongo = require("./../config/mongo.js")
 const tipoObjectId = require("mongodb").ObjectId
-
+const moviesCollection = mongo.collection("movies")
 //Variaveis Globais
 const usercollection = mongo.collection("users")
 const ratingcollection = mongo.collection("ratings_by_user")
@@ -12,28 +12,41 @@ router.use((req, res, next) => {
     next()
 })
 
+
 // Utilizador por ID
 router.get('/:userid', async (req, res) => {
 
   var id_aprocurar = parseInt(req.params.userid)
+  try{
+    users = await usercollection.find({"_id":id_aprocurar}).toArray()
+    if(users.length<1)
+    users = await usercollection.find({"_id":new tipoObjectId(req.params.userid)}).toArray()
   
-  users = await usercollection.find({"_id":id_aprocurar}).toArray()
-  if(users.length<1)
-  users = await usercollection.find({"_id":new tipoObjectId(req.params.userid)}).toArray()
-
-  res.send(users)
+    res.send(users)
+  }
+  catch {
+    res.send([])
+  }
   
 })
 
+
 router.delete('/:userid', async (req, res) => {
 
-  var id_aprocurar = parseInt(req.params.userid)
+  try{
+    var id_aprocurar = parseInt(req.params.userid)
 
-  var EliminarUtilizador = await usercollection.deleteMany({"_id":id_aprocurar})
-  if (EliminarUtilizador.deletedCount <1 )
-  EliminarUtilizador = await usercollection.deleteMany({"_id":new tipoObjectId(req.params.userid)})
+    var EliminarUtilizador = await usercollection.deleteMany({"_id":id_aprocurar})
+    if (EliminarUtilizador.deletedCount <1 )
+    EliminarUtilizador = await usercollection.deleteMany({"_id":new tipoObjectId(req.params.userid)})
+  }
+
+  catch{
+    console.log("erro")
+
+  }
   
-  res.json({"Resultado":EliminarUtilizador})
+  res.json({"Resultado":"mm"})
   
 })
 

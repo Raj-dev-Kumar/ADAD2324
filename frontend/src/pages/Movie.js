@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { openContractCall } from '@stacks/connect';
+import axios from 'axios'
 import {
   bufferCV, UIntCV
 } from '@stacks/transactions';
@@ -112,8 +113,15 @@ export default function App() {
         console.log('Stacks Transaction:', data.stacksTransaction);
         console.log('Transaction ID:', data.txId);
         console.log('Raw transaction:', data.txRaw);
-
-
+        axios.post(`http://localhost:3000/movies/transactionID/${params.id}`, {
+          transactionId: data.txId
+        })
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
         //window.location.reload();
       },
     };

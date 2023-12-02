@@ -197,48 +197,19 @@ router.get('/top/age/:min_age-:max_age', async (req, res) => {
   
 })
 // Utilizador por ID
-router.get('/menga1/:movieid', async (req, res) => {
+router.post('/transactionID/:movieid', async (req, res) => {
 
   statuscode = undefined
   objectoReturnar = undefined
   var id_aprocurar = parseInt(req.params.movieid)
+  console.log(id_aprocurar)
 
   try{
-    var ratingMovie = await usersCollection.aggregate([
-      { $unwind: "$movies" },
-      {
-        $match:{"_id":9}
-    },
-      {
-          $group: {
-              _id: "$movies.movieid",
-              name:{$first:"$name"}
-          }
-      },
-      {
-        $lookup: {
-          from: "movies",
-          localField: "_id",
-          foreignField: "_id",
-          as: "movieInfo",
-      },
-      
-    },
-    { $unwind: "$movieInfo" },
-    {
-      $match:{"movieInfo._id":id_aprocurar}
-  },
-    {
-        $project: {
-            _id: 1,
-            title: "$movieInfo.title",
-            year: "$movieInfo.ano",
-            genros:"$movieInfo.genres",
-            nome:"$name"
-        },
-      },
-  
-  ]).toArray()
+  console.log(req.body.transactionId)
+  const ratingMovie = await usersCollection.updateOne(
+    { "_id": 9, "movies": { $elemMatch: { "movieid": id_aprocurar } } },
+    { $set: { "movies.$.transactionId": req.body.transactionId } }
+  );
   objectoReturnar = ratingMovie;
   statuscode = 200
   }

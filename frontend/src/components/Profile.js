@@ -15,7 +15,7 @@ export default function Profile(props) {
                 </div>
                 <MDBTypography tag="h3" > {props.user.name}</MDBTypography>
                 <MDBCardText className="text-muted mb-4">
-                  {props.user.occupation} <span className="mx-2">|</span> <a>mdbootstrap.com</a>
+                  {props.user.occupation} <span className="mx-2"></span>
                 </MDBCardText>
                 <div className="d-flex justify-content-between text-center mt-5 mb-2">
                   <div>
